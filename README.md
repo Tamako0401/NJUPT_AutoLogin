@@ -2,6 +2,9 @@
 
 南京邮电大学校园网自动登录脚本，支持 macOS、Linux（如 OpenWRT）和 MikroTik RouterOS 平台。**欢迎提交 Issue 和 PR，一起完善这个脚本。**
 
+> [!NOTE]
+> 本分支是基于 [s235784/NJUPT_AutoLogin](https://github.com/s235784/NJUPT_AutoLogin) 的个人维护分支，重点补充 OpenWrt 单线多拨、mwan3 分流、限时账号恢复和凭据安全实践。原项目采用 Apache-2.0 license，本分支继续保留原许可证和原作者信息。
+
 适用于 MikroTik RouterOS 平台的使用教程请 [移步这里](./README_RouterOS.md)
 
 ## 使用方法
@@ -100,9 +103,29 @@ Linux 使用此脚本前需要检查以下依赖是否安装：
 
 确认无误后保存。之后路由器就会每 5 分钟确认一次网络状态，如果允许登录时间内没有登录校园网，路由器就会自动尝试登录了。
 
+### OpenWrt 账号配置与凭据安全
+
+如果需要在路由器上长期运行，尤其是单线多拨或多账号场景，不建议把账号和密码直接写进 LuCI 计划任务。推荐把账号配置放在路由器本地的独立文件中，并限制权限：
+
+```sh
+mkdir -p /root/njupt-autologin/accounts /root/njupt-autologin/locks
+chmod 700 /root/njupt-autologin
+chmod 700 /root/njupt-autologin/accounts /root/njupt-autologin/locks
+```
+
+账号配置文件可以参考 [examples/openwrt/njupt-autologin/accounts](./examples/openwrt/njupt-autologin/accounts)，计划任务只保留不含密码的包装脚本调用：
+
+```crontab
+*/1 * * * * /root/njupt-autologin/login-one.sh vwan1
+*/1 * * * * /root/njupt-autologin/login-one.sh vwan2
+```
+
+包装脚本示例见 [examples/openwrt/njupt-autologin/login-one.sh](./examples/openwrt/njupt-autologin/login-one.sh)。它会用 `flock` 避免并发登录，并通过 `logger` 只记录接口、状态和返回码，不把账号密码写入系统日志。
+
 ## 进阶用法
 
 - [南邮校园网单线多拨](https://nosora.dev/archives/347)（部分宿舍有效，需要更多反馈 [#11](https://github.com/s235784/NJUPT_AutoLogin/issues/11)）
+- [OpenWrt + macvlan + mwan3 单线多拨实践](./doc/openwrt-mwan3-multidial.md)：记录 veth/macvlan、多账号配置、mwan3 分流、限时账号恢复、凭据脱敏和常见坑。
 
 ## IPv6 支持（实验性）
 
