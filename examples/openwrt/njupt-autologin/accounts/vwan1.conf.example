@@ -1,0 +1,7 @@
+IFACE_UCI='vwan1'
+DEV='veth0'
+ISP='njupt'
+LOGIN_ID='YOUR_NJUPT_ID'
+LOGIN_PW='YOUR_PASSWORD'
+TIME_UNLIMITED='1'
+CHECK_URL='http://connect.rom.miui.com/generate_204'

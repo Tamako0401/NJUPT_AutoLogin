@@ -1,0 +1,2 @@
+*/1 * * * * /root/njupt-autologin/login-one.sh vwan1
+*/1 * * * * /root/njupt-autologin/login-one.sh vwan2
